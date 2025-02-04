@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -11,14 +10,15 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
 }
 
-var chat = &Chat{}
+var chat = &Chat{rooms: make(map[string]*Room)}
 
 func main() {
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(w, r)
-	})
+	http.HandleFunc("/ws", serveWs)
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
@@ -32,25 +32,29 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	go handleClient(chat, conn)
+}
+
+func handleClient(chat *Chat, conn *websocket.Conn) {
+	defer conn.Close()
+
 	for {
-		messageType, raw, err := conn.ReadMessage()
+		var msg Message
+		err := conn.ReadJSON(&msg)
 		if err != nil {
 			log.Println(err)
+			conn.WriteJSON(err)
 			return
 		}
 
-		if messageType != websocket.TextMessage {
-			log.Println("invalid message type")
-			continue
+		resMessage, err := chat.processMessage(msg, conn)
+		if err != nil {
+
 		}
-
-		go chat.CreateRoom(string(raw))
-
-		resMessage := fmt.Sprintf("created room with name %s", string(raw))
-		if err := conn.WriteMessage(websocket.TextMessage, []byte(resMessage)); err != nil {
+		if err := conn.WriteJSON(resMessage); err != nil {
 			log.Println(err)
+			conn.Close()
 			return
 		}
 	}
-
 }

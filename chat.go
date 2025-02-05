@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -46,6 +46,7 @@ func (r *Room) broadcast() {
 		}
 		r.mu.RUnlock()
 	}
+	log.Println("broadcast ended")
 }
 
 func NewRoom(name string) *Room {
@@ -53,22 +54,5 @@ func NewRoom(name string) *Room {
 		name:     name,
 		users:    make(map[*websocket.Conn]bool),
 		messages: make(chan ResponseMessage, broadcastBufferSize),
-	}
-}
-
-func (c *Chat) processMessage(msg Message, conn *websocket.Conn) (ResponseMessage, error) {
-	switch msg.Command {
-	case "create_room":
-		return c.createRoom(msg, conn)
-	case "join_room":
-		return c.joinRoom(msg, conn)
-	case "leave_room":
-		return c.leaveRoom(msg, conn)
-	case "send_message":
-		return c.sendMessage(msg, conn)
-	case "delete_room":
-		return c.deleteRoom(msg)
-	default:
-		return ResponseMessage{}, fmt.Errorf("Invalid command")
 	}
 }

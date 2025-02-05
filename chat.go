@@ -1,13 +1,10 @@
 package main
 
 import (
-	"log"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
-
-const broadcastBufferSize = 256
 
 type Chat struct {
 	rooms map[string]*Room
@@ -23,36 +20,10 @@ type Message struct {
 type ResponseMessage struct {
 	Room    string `json:"room,omitempty"`
 	Message string `json:"message"`
+	Error   bool   `json:"error,omitempty"`
 }
 
-type Room struct {
-	users    map[*websocket.Conn]bool
-	name     string
-	messages chan ResponseMessage
-	mu       sync.RWMutex
-}
-
-func (r *Room) broadcast() {
-	for msg := range r.messages {
-		r.mu.RLock()
-		for conn := range r.users {
-			go func(conn *websocket.Conn, msg ResponseMessage) {
-				if err := conn.WriteJSON(msg); err != nil {
-					r.mu.Lock()
-					delete(r.users, conn)
-					r.mu.Unlock()
-				}
-			}(conn, msg)
-		}
-		r.mu.RUnlock()
-	}
-	log.Println("broadcast ended")
-}
-
-func NewRoom(name string) *Room {
-	return &Room{
-		name:     name,
-		users:    make(map[*websocket.Conn]bool),
-		messages: make(chan ResponseMessage, broadcastBufferSize),
-	}
+type Client struct {
+	conn *websocket.Conn
+	mu sync.Mutex
 }

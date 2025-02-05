@@ -24,6 +24,7 @@ type ResponseMessage struct {
 }
 
 type Client struct {
-	conn *websocket.Conn
-	mu sync.Mutex
+	conn  *websocket.Conn
+	comms chan ResponseMessage
+	mu    sync.Mutex
 }

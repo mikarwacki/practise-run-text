@@ -45,12 +45,9 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	defer conn.Close()
 
 	client := &Client{conn: conn, mu: sync.Mutex{}, comms: make(chan ResponseMessage)}
 
 	go client.readPump()
 	go client.writePump(chat)
-
-	select {}
 }

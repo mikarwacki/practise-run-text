@@ -47,6 +47,7 @@ func (c *Client) writePump(chat *Chat) {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
+		c.conn.Close()
 		cleanUp(c, chat)
 	}()
 	for {

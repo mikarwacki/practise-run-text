@@ -90,16 +90,3 @@ func (c *Chat) sendMessage(msg Message, client *Client) {
 	client.comms <- ResponseMessage{Message: "message sent", Room: msg.Room}
 }
 
-func (c *Chat) deleteRoom(msg Message, client *Client) {
-	c.mu.Lock()
-	_, ok := c.rooms[msg.Room]
-	defer c.mu.Unlock()
-
-	if !ok {
-		client.comms <- ResponseMessage{Message: "room does not exist", Room: msg.Room, Error: true}
-		return
-	}
-
-	delete(c.rooms, msg.Room)
-	client.comms <- ResponseMessage{Message: "room deleted", Room: msg.Room}
-}

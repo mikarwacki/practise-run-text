@@ -41,7 +41,7 @@ socket.addEventListener('open', (event) => {
             messagesSent++;
         } else {
             clearInterval(interval);
-            console.log('Finished creating 200 rooms');
+            console.log(`Finished sending ${messagesSent} messages`);
             socket.close();
         }
     }, 1);     

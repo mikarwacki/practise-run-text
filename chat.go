@@ -2,8 +2,6 @@ package main
 
 import (
 	"sync"
-
-	"github.com/gorilla/websocket"
 )
 
 type Chat struct {
@@ -21,10 +19,4 @@ type ResponseMessage struct {
 	Room    string `json:"room,omitempty"`
 	Message string `json:"message"`
 	Error   bool   `json:"error,omitempty"`
-}
-
-type Client struct {
-	conn  *websocket.Conn
-	comms chan ResponseMessage
-	mu    sync.Mutex
 }

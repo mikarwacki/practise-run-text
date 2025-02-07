@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -46,7 +45,7 @@ func serveWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{conn: conn, mu: sync.Mutex{}, comms: make(chan ResponseMessage)}
+	client := &Client{conn: conn, comms: make(chan ResponseMessage)}
 
 	go client.readPump()
 	go client.writePump(chat)

@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -17,7 +16,6 @@ const (
 type Client struct {
 	conn  *websocket.Conn
 	comms chan ResponseMessage
-	mu    sync.Mutex
 }
 
 func (c *Client) readPump() {
